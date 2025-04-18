@@ -19,7 +19,7 @@ router
 router
   .route("/:id")
   .get(protect, getAppointment)
-  .put(protect, authorize('admin', 'user') ,updateAppointment)
-  .delete(protect, authorize('admin', 'user') ,deleteAppointment)
+  .put(protect, authorize("admin", "user"), updateAppointment)
+  .delete(protect, authorize("admin", "user"), deleteAppointment)
 
 module.exports = router

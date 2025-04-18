@@ -19,10 +19,7 @@ const { protect, authorize } = require("../middleware/auth")
 // router.use("/:hotelId/rooms", ???)
 // router.use("/:hotelId/bookings", ???)
 
-router
-  .route("/")
-  .get(getHotels)
-  .post(protect, authorize("admin"), createHotel)
+router.route("/").get(getHotels).post(protect, authorize("admin"), createHotel)
 router
   .route("/:id")
   .get(getHotel)

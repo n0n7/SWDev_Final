@@ -59,10 +59,10 @@ const swaggerOptions = {
       description: "A simple Express VacQ API",
     },
     servers: [
-        {
-            url: 'http://localhost:5000/api/v1',
-        }
-    ]
+      {
+        url: "http://localhost:5000/api/v1",
+      },
+    ],
   },
   apis: ["./routes/*.js"],
 }
