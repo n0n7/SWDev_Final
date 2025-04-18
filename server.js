@@ -15,8 +15,8 @@ dotenv.config({ path: "./config/config.env" })
 const connectDB = require("./config/db")
 
 // Route files
-const hospitals = require("./routes/hospitals")
-const appointments = require("./routes/appointments")
+const hotels = require("./routes/hotels")
+// const appointments = require("./routes/appointments")
 const auth = require("./routes/auth")
 
 // connect to database
@@ -46,8 +46,8 @@ app.use(cookieParser())
 app.use(cors())
 
 // Mount routers
-app.use("/api/v1/hospitals", hospitals)
-app.use("/api/v1/appointments", appointments)
+app.use("/api/v1/hotels", hotels)
+// app.use("/api/v1/appointments", appointments)
 app.use("/api/v1/auth", auth)
 
 const swaggerOptions = {
