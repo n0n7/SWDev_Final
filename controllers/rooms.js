@@ -7,11 +7,30 @@ const Hotel = require('../models/Hotel')
 
 exports.createRoom = async (req, res, next) => {
     try {
-        const room = await Room.create(req.body)
+        const roomsData = req.body.rooms
+
+        if (!Array.isArray(roomsData) || roomsData.length === 0) {
+            return res.status(400).json({ success: false, message: 'Rooms data must be a non-empty array' })
+        }
+
+        // Make sure all rooms have the same hotel and that hotel exists
+        const hotelId = roomsData[0].hotel
+        const hotel = await Hotel.findById(hotelId)
+
+        if (!hotel) {
+            return res.status(400).json({ success: false, message: 'Hotel not found' })
+        }
+
+        const allSameHotel = roomsData.every(room => room.hotel === hotelId)
+        if (!allSameHotel) {
+            return res.status(400).json({ success: false, message: 'All rooms must belong to the same hotel' })
+        }
+
+        const rooms = await Room.insertMany(roomsData)
 
         res.status(201).json({
             success: true,
-            data: room,
+            data: rooms,
         })
     } catch (err) {
         console.log(err)
@@ -81,13 +100,22 @@ exports.getRoom = async (req, res, next) => {
 }
 
 //@ desc    Get all rooms
-//@ route   GET /api/v1/rooms/:hotelId
+//@ route   GET /api/v1/rooms
 //@ access  Public
 
-// TODO: Add pagination and filtering (?)
 exports.getRooms = async (req, res, next) => {
     try {
-        const rooms = await Room.find({ hotel: req.params.hotelId })
+        let query
+
+        // if hotelId is in the query, filter by hotelId
+        if (req.query.hotelId) {
+            query = { hotel: req.query.hotelId }
+        } else {
+            query = {}
+        }
+
+        // get all rooms
+        const rooms = await Room.find(query).populate('hotel')
 
         if (!rooms) {
             return res.status(400).json({ success: false })
@@ -95,11 +123,9 @@ exports.getRooms = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            count: rooms.length,
             data: rooms,
         })
     } catch (err) {
         res.status(400).json({ success: false })
     }
-    
 }

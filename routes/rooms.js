@@ -12,16 +12,15 @@ const router = express.Router()
 
 const { protect, authorize } = require("../middleware/auth")
 
-// TODO: Protect and authorize routes
-
-router.route("/").post(protect, authorize("admin"), createRoom)
+router
+    .route("/")
+    .get(getRooms)
+    .post(protect, authorize("admin"), createRoom)
 
 router
     .route("/:roomId")
     .get(getRoom)
     .put(protect, authorize("admin"), updateRoom)
     .delete(protect, authorize("admin"), deleteRoom)
-
-router.route("/:hotelId").get(getRooms)
 
 module.exports = router
