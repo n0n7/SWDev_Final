@@ -1,4 +1,15 @@
 const User = require("../models/User")
+const bcrypt = require("bcryptjs")
+const crypto = require("crypto")
+const nodemailer = require("nodemailer")
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+})
 
 // get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
@@ -80,12 +91,10 @@ exports.login = async (req, res, next) => {
 
     sendTokenResponse(user, 200, res)
   } catch (err) {
-    return res
-      .status(401)
-      .json({
-        success: false,
-        msg: "Cannot convert email or password to string",
-      })
+    return res.status(401).json({
+      success: false,
+      msg: "Cannot convert email or password to string",
+    })
   }
 }
 
@@ -113,4 +122,76 @@ exports.logout = async (req, res, next) => {
     success: true,
     data: {},
   })
+}
+
+//@desc    Send reset password link
+//@route   POST /api/v1/auth/forgotpassword
+//@access  Public
+exports.forgotPassword = async (req, res, next) => {
+  const { email } = req.body
+
+  try {
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(404).json({ success: false })
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex")
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex")
+
+    user.resetPasswordToken = hashedToken
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000 // 10 minutes
+    await user.save()
+
+    const resetLink = `${process.env.BASE_URL}/resetpassword/${resetToken}`
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset Request",
+      text: `You requested a password reset. Click on the link to reset your password: ${resetLink}`,
+    }
+
+    await transporter.sendMail(mailOptions)
+    res.status(200).json({
+      success: true,
+      token: resetToken,
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(400).json({ success: false })
+  }
+}
+
+//@desc    reset password
+//@route   POST /api/v1/auth/resetpassword
+//@access  Public
+exports.resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body
+
+  try {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex")
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    })
+
+    if (!user) {
+      console.log("User not found")
+      return res.status(400).json({ success: false })
+    }
+    user.password = newPassword
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+    await user.save()
+    res.status(200).json({
+      success: true,
+      data: user,
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(400).json({ success: false })
+  }
 }
