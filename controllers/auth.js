@@ -56,7 +56,7 @@ exports.register = async (req, res, next) => {
     sendTokenResponse(user, 200, res)
   } catch (err) {
     console.log(err)
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false })
   }
 }
 
@@ -161,7 +161,7 @@ exports.forgotPassword = async (req, res, next) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false })
   }
 }
 
@@ -192,6 +192,6 @@ exports.resetPassword = async (req, res) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false })
   }
 }

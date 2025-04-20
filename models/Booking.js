@@ -16,12 +16,12 @@ const BookingSchema = new mongoose.Schema({
   },
   hotel: {
     type: mongoose.Schema.ObjectId,
-    ref: "hotel",
+    ref: "Hotel",
     required: true,
   },
   room: {
     type: mongoose.Schema.ObjectId,
-    ref: "room",
+    ref: "Room",
     required: true,
   },
   createdAt: {

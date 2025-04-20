@@ -7,23 +7,15 @@ const Room = require("../models/Room")
 
 exports.createBooking = async (req, res, next) => {
     try {
-        // check if hotel and room exist
-        const hotelId = req.body.hotel
-        const hotel = await Hotel.findById(hotelId)
-        if (!hotel) {
-            return res.status(400).json({ success: false })
-        }
 
+        req.body.user = req.user.id
+        // check if room exist
         const roomId = req.body.room
         const room = await Room.findById(roomId)
         if (!room) {
             return res.status(400).json({ success: false })
         }
-
-        // check if room is in the hotel
-        if(room.hotel.toString() !== hotelId) {
-            return res.status(400).json({ success: false })
-        }
+        req.body.hotel = room.hotel
 
         // check if booking is in the future
         const checkInDate = new Date(req.body.checkIn)
@@ -50,6 +42,7 @@ exports.createBooking = async (req, res, next) => {
             checkOut: { $gt: req.body.checkIn }, 
         })
 
+
         if (overlapbookings.length >= room.roomCount) {
             return res.status(400).json({ success: false })
         }
@@ -69,7 +62,7 @@ exports.createBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }
 
@@ -81,25 +74,15 @@ exports.updateBooking = async (req, res, next) => {
     try {
         const booking = await Booking.findById(req.params.id)
 
+        console.log(booking)
         if (!booking) {
             return res.status(400).json({ success: false })
         }
 
         // check if hotel and room exist
-        const hotelId = req.body.hotel
-        const hotel = await Hotel.findById(hotelId)
-        if (!hotel) {
-            return res.status(400).json({ success: false })
-        }
-
         const roomId = req.body.room
         const room = await Room.findById(roomId)
         if (!room) {
-            return res.status(400).json({ success: false })
-        }
-
-        // check if room is in the hotel
-        if(room.hotel.toString() !== hotelId) {
             return res.status(400).json({ success: false })
         }
 
@@ -177,7 +160,7 @@ exports.getBookings = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }
 
@@ -205,7 +188,7 @@ exports.getBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }
 
@@ -234,6 +217,6 @@ exports.deleteBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }

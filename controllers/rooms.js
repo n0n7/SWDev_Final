@@ -34,7 +34,7 @@ exports.createRoom = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }
 
@@ -55,7 +55,7 @@ exports.updateRoom = async (req, res, next) => {
 
         res.status(200).json({ success: true, data: room })
     } catch (err) {
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }
 
@@ -71,11 +71,12 @@ exports.deleteRoom = async (req, res, next) => {
             return res.status(400).json({ success: false })
         }
 
-        await room.remove()
+        await room.deleteOne()
 
         res.status(200).json({ success: true, data: {} })
     } catch (err) {
-        res.status(400).json({ success: false })
+        console.log(err)
+        res.status(500).json({ success: false })
     }
 }
 
@@ -95,7 +96,7 @@ exports.getRoom = async (req, res, next) => {
             data: room,
         })
     } catch (err) {
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false })
     }
 }
 
@@ -126,6 +127,7 @@ exports.getRooms = async (req, res, next) => {
             data: rooms,
         })
     } catch (err) {
-        res.status(400).json({ success: false })
+        console.log(err)
+        res.status(500).json({ success: false })
     }
 }
