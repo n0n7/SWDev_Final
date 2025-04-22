@@ -1,0 +1,157 @@
+@startuml Class Diagram
+left to right direction
+skinparam packagePadding 20
+skinparam classAttributeIconSize 0
+
+class Application <<Application>>
+
+' Routers
+class AuthRouter <<Router>>
+class HotelRouter <<Router>>
+class RoomRouter <<Router>>
+class BookingRouter <<Router>>
+
+' Controllers
+class AuthController <<Controller>> {
+    + <<POST>> register()
+    + <<POST>> login()
+    + <<GET>> logout()
+    + <<POST>> forgotPassword()
+    + <<POST>> resetPassword()
+    - sendTokenResponse(user, statusCode, res)
+}
+
+class HotelController <<Controller>> {
+    + <<GET>> getHotels()
+    + <<GET>> getHotel()
+    + <<GET>> createHotel()
+    + <<PUT>> updateHotel()
+    + <<DELETE>> deleteHotel()
+}
+
+class RoomController <<Controller>> {
+    + <<POST>> createNewCoWorking()
+    + <<GET>> getOneCoWorking()
+    + <<GET>> getAllCoWorkings()
+    + <<PUT>> updateCoWorking()
+    + <<DELETE>> deleteCoWorking()
+}
+
+class BookingController <<Controller>> {
+    + <<POST>> createBooking()
+    + <<GET>> getBookings()
+    + <<GET>> getBooking()
+    + <<PUT>> updateBooking()
+    + <<DELETE>> deleteBooking()
+}
+
+class ReservationController <<Controller>> {
+    + <<POST>> createRoom()
+    + <<GET>> getRooms()
+    + <<GET>> getRoom()
+    + <<PUT>> updateRoom()
+    + <<DELETE>> deleteRoom()
+}
+
+' Model
+class UserModel <<Model>> {
+    - id: number
+    - name: string
+    - email: string
+    - password: string
+    - role: UserRole
+    - resetPasswordToken: string
+    - resetPasswordExpire: Date
+    - createdAt: Date
+    - updatedAt: Date
+
+    + getSignedJwtToken(): string
+    + matchPassword(): boolean
+}
+
+class HotelModel <<Model>> {
+    - id: number
+    - name: string
+    - address: string
+    - district: string
+    - province: string
+    - postalcode: string
+    - tel: string
+    - region: string
+    - createdAt: Date
+    - updatedAt: Date
+}
+
+class RoomModel <<Model>> {
+    - id: number
+    - name: string
+    - hotel: mongoose.Schema.ObjectId
+    - maxCapacity: number
+    - roomCount: number
+    - createdAt: Date
+    - updatedAt: Date
+}
+
+class BookingModel <<Model>> {
+    - id: number
+    - user: mongoose.Schema.ObjectId
+    - hotel: mongoose.Schema.ObjectId
+    - room: mongoose.Schema.ObjectId
+    - startDate: Date
+    - endDate: Date
+    - createdAt: Date
+    - updatedAt: Date
+}
+
+' Utils
+class NodeMailer <<Utils>> {
+    + sendEmail(options: object): Promise<void>
+}
+
+' Middlewares
+class authorize <<Middleware>>
+class protect <<Middleware>>
+
+'' Service & Router
+Application --> AuthRouter: "/auth\n<<Path>>"
+Application --> HotelRouter: "/hotels\n<<Path>>"
+Application --> BookingRouter: "/bookings\n<<Path>>"
+Application --> RoomRouter: "/rooms\n<<Path>>"
+
+'' Routers & Routers
+CoWorkingRouter --> RoomRouter: "/rooms\n<<Path>>"
+RoomRouter --> ReservationRouter: "/reservations\n<<Path>>"
+
+'' Router & Middlewares
+AuthRouter --> authorize: "uses"
+AuthRouter --> protect: "uses"
+
+HotelRouter --> authorize: "uses"
+HotelRouter --> protect: "uses"
+
+RoomRouter --> authorize: "uses"
+RoomRouter --> protect: "uses"
+
+BookingRouter --> authorize: "uses"
+BookingRouter --> protect: "uses"
+
+'' Routers & Controllers
+AuthRouter --> AuthController: "uses"
+HotelRouter --> HotelController: "uses"
+RoomRouter --> RoomController: "uses"
+BookingRouter --> BookingController: "uses"
+
+'' Controllers & Models
+AuthController --> UserModel: "uses"
+HotelController --> HotelModel: "uses"
+RoomController --> RoomModel: "uses"
+BookingController --> BookingModel: "uses"
+RoomController --> BookingModel: "uses"
+BookingController --> BookingModel: "uses"
+BookingController --> HotelModel: "uses"
+BookingController --> RoomModel: "uses"
+
+'' Utils
+AuthController --> NodeMailer: "uses"
+
+@enduml
