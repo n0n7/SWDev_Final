@@ -54,7 +54,7 @@ class ReservationController <<Controller>> {
 }
 
 ' Model
-class UserModel <<Model>> {
+class User <<Model>> {
     - id: number
     - name: string
     - email: string
@@ -69,7 +69,7 @@ class UserModel <<Model>> {
     + matchPassword(): boolean
 }
 
-class HotelModel <<Model>> {
+class Hotel <<Model>> {
     - id: number
     - name: string
     - address: string
@@ -82,7 +82,7 @@ class HotelModel <<Model>> {
     - updatedAt: Date
 }
 
-class RoomModel <<Model>> {
+class Room <<Model>> {
     - id: number
     - name: string
     - hotel: mongoose.Schema.ObjectId
@@ -92,7 +92,7 @@ class RoomModel <<Model>> {
     - updatedAt: Date
 }
 
-class BookingModel <<Model>> {
+class Booking <<Model>> {
     - id: number
     - user: mongoose.Schema.ObjectId
     - hotel: mongoose.Schema.ObjectId
@@ -142,14 +142,14 @@ RoomRouter --> RoomController: "uses"
 BookingRouter --> BookingController: "uses"
 
 '' Controllers & Models
-AuthController --> UserModel: "uses"
-HotelController --> HotelModel: "uses"
-RoomController --> RoomModel: "uses"
-BookingController --> BookingModel: "uses"
-RoomController --> BookingModel: "uses"
-BookingController --> BookingModel: "uses"
-BookingController --> HotelModel: "uses"
-BookingController --> RoomModel: "uses"
+AuthController --> User: "uses"
+HotelController --> Hotel: "uses"
+RoomController --> Room: "uses"
+BookingController --> Booking: "uses"
+RoomController --> Booking: "uses"
+BookingController --> Booking: "uses"
+BookingController --> Hotel: "uses"
+BookingController --> Room: "uses"
 
 '' Utils
 AuthController --> NodeMailer: "uses"
