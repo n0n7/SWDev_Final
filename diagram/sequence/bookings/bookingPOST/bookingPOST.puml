@@ -1,0 +1,39 @@
+@startuml Manage Booking (POST)
+
+footer Page %page% of %lastpage%
+title "Manage Booking (POST)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<middleware>>\n:auth" as authMiddleware
+participant "<<service>>\n:jwt" as jwtService
+participant "<<controllers>>\n:bookings" as controllersBookings
+participant "<<model>>\n:Booking" as modelBooking
+participant "<<model>>\n:User" as modelUser
+database "<<MongoDB>>\n:bookings" as BookingsDatabase
+database "<<MongoDB>>\n:users" as UsersDatabase
+
+client->server ++:req.post('/api/v1/bookings')
+server->routerBookings ++:app.use('/api/v1/bookings',bookings)
+
+routerBookings -> authMiddleware ++:protect()
+authMiddleware -> jwtService ++:verifyToken(token, secret)
+authMiddleware <-- jwtService --: decodedId
+
+authMiddleware -> modelUser ++: findById(decodedId)
+modelUser -> UsersDatabase ++: findById(decodedId)
+modelUser <-- UsersDatabase --: user
+authMiddleware <-- modelUser --: req.user
+authMiddleware -> routerBookings --: next()
+routerBookings -> authMiddleware ++: authorize('admin', 'user')
+authMiddleware -> routerBookings --: next()
+
+routerBookings -> controllersBookings ++:createBooking()
+controllersBookings->modelBooking ++:create(req.body)
+modelBooking ->BookingsDatabase ++: create(req.body)
+BookingsDatabase --> modelBooking --: booking
+controllersBookings <-- modelBooking --:booking
+controllersBookings->client --:response
+
+@enduml

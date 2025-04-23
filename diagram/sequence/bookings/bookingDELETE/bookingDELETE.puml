@@ -1,0 +1,39 @@
+@startuml Delete Booking (DELETE)
+
+footer Page %page% of %lastpage%
+title "Delete Booking (DELETE)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<middleware>>\n:auth" as authMiddleware
+participant "<<service>>\n:jwt" as jwtService
+participant "<<controllers>>\n:bookings" as controllersBookings
+participant "<<model>>\n:Booking" as modelBooking
+participant "<<model>>\n:User" as modelUser
+database "<<MongoDB>>\n:bookings" as BookingsDatabase
+database "<<MongoDB>>\n:users" as UsersDatabase
+
+client->server ++:req.delete('/api/v1/bookings/:id')
+server->routerBookings ++:app.use('/api/v1/bookings',  bookings)
+
+routerBookings -> authMiddleware ++:protect()
+authMiddleware -> jwtService ++:verifyToken(token, secret)
+authMiddleware <-- jwtService --: decodedId
+
+authMiddleware -> modelUser ++: findById(decodedId)
+modelUser -> UsersDatabase ++: findById(decodedId)
+modelUser <-- UsersDatabase --: user
+authMiddleware <-- modelUser --: req.user
+authMiddleware -> routerBookings --: next()
+routerBookings -> authMiddleware ++: authorize('admin', 'user')
+authMiddleware -> routerBookings --: next()
+
+routerBookings -> controllersBookings ++:deleteBooking()
+controllersBookings->modelBooking ++:delete(req.params.id)
+modelBooking ->BookingsDatabase ++: delete(id)
+BookingsDatabase --> modelBooking --: booking
+controllersBookings <-- modelBooking --: booking
+controllersBookings->client --:response
+
+@enduml
