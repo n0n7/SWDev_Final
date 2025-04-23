@@ -1,6 +1,5 @@
 @startuml Get All Hotels (GET ALL)
 
-header Sample VacQ Sequence Diagram
 footer Page %page% of %lastpage%
 title "Get All Hotels (GET ALL)"
 
@@ -14,8 +13,8 @@ database "<<MongoDB>>\n:hotels" as HotelsDatabase
 client->server ++:req.get('/api/v1/hotels')
 server->routerHotels ++:app.use('/api/v1/hotels',hotels)
 routerHotels -> controllersHotels ++:getHotels()
-controllersHotels->modelHotel ++:getAll()
-modelHotel ->HotelsDatabase ++: HotelSchema
+controllersHotels->modelHotel ++:find()
+modelHotel ->HotelsDatabase ++: find()
 HotelsDatabase --> modelHotel --: hotels
 controllersHotels <-- modelHotel --:hotels
 controllersHotels->client --:response

@@ -1,6 +1,5 @@
 @startuml Manage Hotel (POST)
 
-header Sample VacQ Sequence Diagram
 footer Page %page% of %lastpage%
 title "Manage Hotel (POST)"
 
@@ -33,7 +32,7 @@ authMiddleware -> routerHotels --: next()
 
 routerHotels -> controllersHotels ++:createHotel()
 controllersHotels->modelHotel ++:create(req.body)
-modelHotel ->HotelsDatabase ++: HotelSchema
+modelHotel ->HotelsDatabase ++: create(req.body)
 HotelsDatabase --> modelHotel --: hotel
 controllersHotels <-- modelHotel --:hotel
 controllersHotels->client --:response

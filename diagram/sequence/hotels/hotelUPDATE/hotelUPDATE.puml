@@ -1,6 +1,5 @@
 @startuml Update Hotel (PUT)
 
-header Sample VacQ Sequence Diagram
 footer Page %page% of %lastpage%
 title "Update Hotel (PUT)"
 
@@ -32,7 +31,7 @@ authMiddleware -> routerHotels --: next()
 
 routerHotels -> controllersHotels ++:updateHotel()
 controllersHotels->modelHotel ++:update(req.params.id,req.body)
-modelHotel ->HotelsDatabase ++: HotelSchema
+modelHotel ->HotelsDatabase ++: update(req.params.id,req.body)
 HotelsDatabase --> modelHotel --: hotel
 controllersHotels <-- modelHotel --:hotel
 controllersHotels->client --:response

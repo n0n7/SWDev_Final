@@ -1,6 +1,5 @@
 @startuml Get Hotel (GET ONE)
 
-header Sample VacQ Sequence Diagram
 footer Page %page% of %lastpage%
 title "Get Hotel (GET ONE)"
 
@@ -14,8 +13,8 @@ database "<<MongoDB>>\n:hotels" as HotelsDatabase
 client->server ++:req.get('/api/v1/hotels/:id')
 server->routerHotels ++:app.use('/api/v1/hotels',hotels)
 routerHotels -> controllersHotels ++:getHotel()
-controllersHotels->modelHotel ++:getOne(req.params.id)
-modelHotel ->HotelsDatabase ++: HotelSchema
+controllersHotels->modelHotel ++:findbyId(req.params.id)
+modelHotel ->HotelsDatabase ++: findbyId()
 HotelsDatabase --> modelHotel --: hotel
 controllersHotels <-- modelHotel --:hotel
 controllersHotels->client --:response

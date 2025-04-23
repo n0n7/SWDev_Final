@@ -1,6 +1,5 @@
 @startuml Delete Hotel (DELETE)
 
-header Sample VacQ Sequence Diagram
 footer Page %page% of %lastpage%
 title "Delete Hotel (DELETE)"
 
@@ -32,7 +31,7 @@ authMiddleware -> routerHotels --: next()
 
 routerHotels -> controllersHotels ++:deleteHotel()
 controllersHotels->modelHotel ++:delete(req.params.id)
-modelHotel ->HotelsDatabase ++: HotelSchema
+modelHotel ->HotelsDatabase ++: delete(id)
 HotelsDatabase --> modelHotel --: hotel
 controllersHotels <-- modelHotel --:hotel
 controllersHotels->client --:response
