@@ -45,6 +45,30 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body
 
+    // Validate name, email, password
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a name, email and password",
+      })
+    }
+
+    // Validate email in correct format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: "Invalid email format" })
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" })
+    }
+
+    // Check if user already exists
+    if(User.findOne({ email })) {
+        return res.status(400).json({ success: false, message: "User already exists" })
+    }
+
     // Create user
     const user = await User.create({
       name,
@@ -56,7 +80,7 @@ exports.register = async (req, res, next) => {
     sendTokenResponse(user, 200, res)
   } catch (err) {
     console.log(err)
-    res.status(500).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -71,7 +95,7 @@ exports.login = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        msg: "Please provide an email and password",
+        message: "Please provide an email and password",
       })
     }
 
@@ -79,22 +103,20 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ email }).select("+password")
 
     if (!user) {
-      res.status(400).json({ success: false, msg: "Invalid credentials" })
+      res.status(400).json({ success: false, message: "Invalid credentials" })
     }
 
     // check if password matches
     const isMatch = await user.matchPassword(password)
 
     if (!isMatch) {
-      res.status(401).json({ success: false, msg: "Invalid credentials" })
+      res.status(401).json({ success: false, message: "Invalid credentials" })
     }
 
     sendTokenResponse(user, 200, res)
   } catch (err) {
-    return res.status(401).json({
-      success: false,
-      msg: "Cannot convert email or password to string",
-    })
+    console.log(err)
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -161,7 +183,7 @@ exports.forgotPassword = async (req, res, next) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(500).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -192,6 +214,6 @@ exports.resetPassword = async (req, res) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(500).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }

@@ -34,7 +34,7 @@ exports.createRoom = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: 'Server error. Please try again.' })
     }
 }
 
@@ -50,12 +50,12 @@ exports.updateRoom = async (req, res, next) => {
         })
 
         if (!room) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: 'Room not found' })
         }
 
         res.status(200).json({ success: true, data: room })
     } catch (err) {
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: 'Server error. Please try again.' })
     }
 }
 
@@ -68,7 +68,7 @@ exports.deleteRoom = async (req, res, next) => {
         const room = await Room.findById(req.params.roomId)
 
         if (!room) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: 'Room not found' })
         }
 
         await room.deleteOne()
@@ -76,7 +76,7 @@ exports.deleteRoom = async (req, res, next) => {
         res.status(200).json({ success: true, data: {} })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: 'Server error. Please try again.' })
     }
 }
 
@@ -88,7 +88,7 @@ exports.getRoom = async (req, res, next) => {
         const room = await Room.findById(req.params.roomId)
 
         if (!room) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: 'Room not found' })
         }
 
         res.status(200).json({
@@ -96,7 +96,7 @@ exports.getRoom = async (req, res, next) => {
             data: room,
         })
     } catch (err) {
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: 'Server error. Please try again.' })
     }
 }
 
@@ -119,7 +119,7 @@ exports.getRooms = async (req, res, next) => {
         const rooms = await Room.find(query).populate('hotel')
 
         if (!rooms) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: 'No rooms found' })
         }
 
         res.status(200).json({
@@ -128,6 +128,6 @@ exports.getRooms = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: 'Server error. Please try again.' })
     }
 }

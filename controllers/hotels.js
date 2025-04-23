@@ -83,7 +83,7 @@ exports.getHotels = async (req, res, next) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -95,7 +95,7 @@ exports.getHotel = async (req, res, next) => {
     const hotel = await Hotel.findById(req.params.id)
 
     if (!hotel) {
-      return res.status(400).json({ success: false })
+      return res.status(404).json({ success: false, message: "Hotel not found" })
     }
 
     res.status(200).json({
@@ -103,7 +103,7 @@ exports.getHotel = async (req, res, next) => {
       data: hotel,
     })
   } catch (err) {
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -119,7 +119,7 @@ exports.createHotel = async (req, res, next) => {
     })
   } catch (err) {
     console.log(err)
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -134,12 +134,12 @@ exports.updateHotel = async (req, res, next) => {
     })
 
     if (!hotel) {
-      return res.status(400).json({ success: false })
+      return res.status(404).json({ success: false, message: "Hotel not found" })
     }
 
     res.status(200).json({ success: true, data: hotel })
   } catch (err) {
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }
 
@@ -151,7 +151,7 @@ exports.deleteHotel = async (req, res, next) => {
     const hotel = await Hotel.findById(req.params.id)
 
     if (!hotel) {
-      return res.status(400).json({ success: false })
+      return res.status(404).json({ success: false, message: "Hotel not found." })
     }
 
     await Booking.deleteMany({ hotel: req.params.id })
@@ -160,6 +160,6 @@ exports.deleteHotel = async (req, res, next) => {
 
     res.status(200).json({ success: true, data: {} })
   } catch (err) {
-    res.status(400).json({ success: false })
+    res.status(500).json({ success: false, message: "Server error. Please try again." })
   }
 }

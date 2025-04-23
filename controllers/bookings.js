@@ -13,7 +13,7 @@ exports.createBooking = async (req, res, next) => {
         const roomId = req.body.room
         const room = await Room.findById(roomId)
         if (!room) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Room not found" })
         }
         req.body.hotel = room.hotel
 
@@ -22,17 +22,17 @@ exports.createBooking = async (req, res, next) => {
         const checkOutDate = new Date(req.body.checkOut)
         const currentDate = new Date()
         if (checkInDate < currentDate || checkOutDate < currentDate) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Booking dates must be in the future" })
         }
 
         // check if booking is valid (no more than 3 nights)
         if (checkInDate >= checkOutDate) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Check-out date must be after check-in date" })
         }
         const diffTime = Math.abs(checkOutDate - checkInDate)
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         if (diffDays > 3) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Booking cannot exceed 3 nights" })
         }
         
         // check if room is available
@@ -44,14 +44,14 @@ exports.createBooking = async (req, res, next) => {
 
 
         if (overlapbookings.length >= room.roomCount) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Room is not available for the selected dates" })
         }
 
         // check if capacity is exceeded
         const totalGuests = req.body.guestCount
         const maxCapacity = room.maxCapacity
         if (totalGuests > maxCapacity) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Guest count exceeds room capacity" })
         }
 
         const booking = await Booking.create(req.body)
@@ -62,7 +62,7 @@ exports.createBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: "Server error. Please try again." })
     }
 }
 
@@ -76,14 +76,14 @@ exports.updateBooking = async (req, res, next) => {
 
         console.log(booking)
         if (!booking) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: "Booking not found" })
         }
 
         // check if hotel and room exist
         const roomId = req.body.room
         const room = await Room.findById(roomId)
         if (!room) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Room not found" })
         }
 
         // check if booking is in the future
@@ -91,17 +91,17 @@ exports.updateBooking = async (req, res, next) => {
         const checkOutDate = new Date(req.body.checkOut)
         const currentDate = new Date()
         if (checkInDate < currentDate || checkOutDate < currentDate) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Booking dates must be in the future" })
         }
         
         // check if booking is valid (no more than 3 nights)
         if (checkInDate >= checkOutDate) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Check-out date must be after check-in date" })
         }
         const diffTime = Math.abs(checkOutDate - checkInDate)
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         if (diffDays > 3) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Booking cannot exceed 3 nights" })
         }
         
         // check if room is available
@@ -112,14 +112,14 @@ exports.updateBooking = async (req, res, next) => {
         })
 
         if (overlapbookings.length >= room.roomCount) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Room is not available for the selected dates" })
         }
 
         // check if capacity is exceeded
         const totalGuests = req.body.guestCount
         const maxCapacity = room.maxCapacity
         if (totalGuests > maxCapacity) {
-            return res.status(400).json({ success: false })
+            return res.status(400).json({ success: false, message: "Guest count exceeds room capacity" })
         }
 
         const updatedBooking = await Booking.findByIdAndUpdate(
@@ -134,7 +134,7 @@ exports.updateBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(400).json({ success: false })
+        res.status(500).json({ success: false, message: "Server error. Please try again." })
     }
 }
 
@@ -160,7 +160,7 @@ exports.getBookings = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: "Server error. Please try again." })
     }
 }
 
@@ -174,12 +174,12 @@ exports.getBooking = async (req, res, next) => {
         const booking = await Booking.findById(req.params.id)
 
         if (!booking) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: "Booking not found" })
         }
 
         // check if user is authorized to view booking
         if (req.user.role !== "admin" && booking.user.toString() !== req.user.id) {
-            return res.status(401).json({ success: false })
+            return res.status(401).json({ success: false, message: "Unauthorized" })
         }
 
         res.status(200).json({
@@ -188,7 +188,7 @@ exports.getBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: "Server error. Please try again." })
     }
 }
 
@@ -201,12 +201,12 @@ exports.deleteBooking = async (req, res, next) => {
         const booking = await Booking.findById(req.params.id)
 
         if (!booking) {
-            return res.status(400).json({ success: false })
+            return res.status(404).json({ success: false, message: "Booking not found" })
         }
 
         // check if user is authorized to delete booking
         if (req.user.role !== "admin" && booking.user.toString() !== req.user.id) {
-            return res.status(401).json({ success: false })
+            return res.status(401).json({ success: false, message: "Unauthorized" })
         }
 
         await booking.deleteOne()
@@ -217,6 +217,6 @@ exports.deleteBooking = async (req, res, next) => {
         })
     } catch (err) {
         console.log(err)
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, message: "Server error. Please try again." })
     }
 }
