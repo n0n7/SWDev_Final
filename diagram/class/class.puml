@@ -108,6 +108,10 @@ class NodeMailer <<Utils>> {
     + sendEmail(options: object): Promise<void>
 }
 
+class JWT <<Utils>> {
+    + verify(token: string, secret: string): object
+}
+
 ' Middlewares
 class authorize <<Middleware>>
 class protect <<Middleware>>
@@ -151,7 +155,12 @@ BookingController --> Booking: "uses"
 BookingController --> Hotel: "uses"
 BookingController --> Room: "uses"
 
+'' Middlewares & Models
+authorize --> User: "uses"
+protect --> User: "uses"
+
 '' Utils
 AuthController --> NodeMailer: "uses"
+authorize --> JWT: "uses"
 
 @enduml
