@@ -70,6 +70,11 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "User already exists" })
     }
 
+    // Check if role is "user" or "admin"
+    if (role !== "user" && role !== "admin") {
+      return res.status(400).json({ success: false, message: "Invalid role" })
+    }
+    
     // Create user
     const user = await User.create({
       name,

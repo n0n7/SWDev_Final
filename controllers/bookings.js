@@ -18,18 +18,18 @@ exports.createBooking = async (req, res, next) => {
         req.body.hotel = room.hotel
 
         // check if booking is in the future
-        const checkInDate = new Date(req.body.checkIn)
-        const checkOutDate = new Date(req.body.checkOut)
+        const startDate = new Date(req.body.startDate)
+        const endDate = new Date(req.body.endDate)
         const currentDate = new Date()
-        if (checkInDate < currentDate || checkOutDate < currentDate) {
+        if (startDate < currentDate || endDate < currentDate) {
             return res.status(400).json({ success: false, message: "Booking dates must be in the future" })
         }
 
         // check if booking is valid (no more than 3 nights)
-        if (checkInDate >= checkOutDate) {
+        if (startDate >= endDate) {
             return res.status(400).json({ success: false, message: "Check-out date must be after check-in date" })
         }
-        const diffTime = Math.abs(checkOutDate - checkInDate)
+        const diffTime = Math.abs(endDate - startDate)
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         if (diffDays > 3) {
             return res.status(400).json({ success: false, message: "Booking cannot exceed 3 nights" })
@@ -38,8 +38,8 @@ exports.createBooking = async (req, res, next) => {
         // check if room is available
         const overlapbookings = await Booking.find({
             room: roomId,
-            checkIn: { $lt: req.body.checkOut },
-            checkOut: { $gt: req.body.checkIn }, 
+            startDate: { $lt: req.body.endDate },
+            endDate: { $gt: req.body.startDate }, 
         })
 
 
@@ -87,18 +87,18 @@ exports.updateBooking = async (req, res, next) => {
         }
 
         // check if booking is in the future
-        const checkInDate = new Date(req.body.checkIn)
-        const checkOutDate = new Date(req.body.checkOut)
+        const startDate = new Date(req.body.startDate)
+        const endDate = new Date(req.body.endDate)
         const currentDate = new Date()
-        if (checkInDate < currentDate || checkOutDate < currentDate) {
+        if (startDate < currentDate || endDate < currentDate) {
             return res.status(400).json({ success: false, message: "Booking dates must be in the future" })
         }
         
         // check if booking is valid (no more than 3 nights)
-        if (checkInDate >= checkOutDate) {
+        if (startDate >= endDate) {
             return res.status(400).json({ success: false, message: "Check-out date must be after check-in date" })
         }
-        const diffTime = Math.abs(checkOutDate - checkInDate)
+        const diffTime = Math.abs(endDate - startDate)
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         if (diffDays > 3) {
             return res.status(400).json({ success: false, message: "Booking cannot exceed 3 nights" })
@@ -107,11 +107,11 @@ exports.updateBooking = async (req, res, next) => {
         // check if room is available
         const overlapbookings = await Booking.find({
             room: roomId,
-            checkIn: { $lt: req.body.checkOut },
-            checkOut: { $gt: req.body.checkIn }, 
+            startDate: { $lt: req.body.endDate },
+            endDate: { $gt: req.body.startDate }, 
         })
 
-        if (overlapbookings.length >= room.roomCount) {
+        if (overlapbookings.filter(booking => booking._id.toString() !== req.params.id).length >= room.roomCount) {
             return res.status(400).json({ success: false, message: "Room is not available for the selected dates" })
         }
 
