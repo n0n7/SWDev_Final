@@ -109,14 +109,14 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ email }).select("+password")
 
     if (!user) {
-      res.status(400).json({ success: false, message: "Invalid credentials" })
+        return res.status(400).json({ success: false, message: "Invalid credentials" })
     }
 
     // check if password matches
     const isMatch = await user.matchPassword(password)
 
     if (!isMatch) {
-      res.status(401).json({ success: false, message: "Invalid credentials" })
+        return res.status(401).json({ success: false, message: "Invalid credentials" })
     }
 
     sendTokenResponse(user, 200, res)
